@@ -15,7 +15,7 @@ def run():
                 "bo_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-bo.txt",
                 "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt"
             }
-        )
+        ),
         outputs=gr.outputs.JSON(),
     )
 
