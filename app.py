@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -20,22 +21,23 @@ def download_file(url, output_path=Path("./data")):
     return local_filename
 
 
-def _run_align_script(bo_fn, en_fn, output_path):
-    import subprocess
-    import sys
-
-    cmd = ["/app/align_tib_en.sh", bo_fn, en_fn, output_path]
-    output = subprocess.run(cmd, check=True, capture_output=True, text=True)
-    output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
-    return output_fn
+def _run_align_script(bo_fn, en_fn, output_dir):
+    pass
 
 
 def align(file_urls):
     with tempfile.TemporaryDirectory() as tmpdir:
-        bo_fn = download_file(file_urls["bo_file_url"], Path(tmpdir))
-        en_fn = download_file(file_urls["en_file_url"], Path(tmpdir))
-        aligned_fn = _run_align_script(bo_fn, en_fn, Path(tmpdir))
-    return Path(aligned_fn).read_text()
+        output_dir = Path(tmpdir)
+        bo_fn = download_file(file_urls["bo_file_url"], output_dir)
+        en_fn = download_file(file_urls["en_file_url"], output_dir)
+        # aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
+
+        cmd = ["/app/align_tib_en.sh", bo_fn, en_fn, output_dir]
+        output = subprocess.run(
+            cmd, check=True, capture_output=True, text=True, cwd="/app"
+        )
+        output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
+        return output.stderr + output.stdout
 
 
 if DEV:
@@ -68,4 +70,4 @@ else:
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, show_error=True, debug=True)
