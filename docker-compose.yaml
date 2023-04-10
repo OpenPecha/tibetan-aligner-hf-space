@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  gradio:
+    build: .
+    container_name: tibetan_aligner_hf_space
+    command: "gradio app.py"
+    ports:
+      - "8000:7860"
+    volumes:
+      - .:/home/user/app
