@@ -1,10 +1,12 @@
 ---
 title: Tibetan Aligner
-emoji: 💩
-colorFrom: red
-colorTo: blue
-sdk: docker
-pinned: false
+emoji: 📖
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: 3.24.1
+app_file: app.py
+pinned: true
 license: mit
 ---
 
