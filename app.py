@@ -22,7 +22,14 @@ def download_file(url, output_path=Path("./data")):
 
 
 def _run_align_script(bo_fn, en_fn, output_dir):
-    pass
+    aligner_script_dir = "../tibetan-aligner"
+    cmd = ["../tibetan-aligner/align_tib_en.sh", bo_fn, en_fn, output_dir]
+    output = subprocess.run(
+        cmd, check=True, capture_output=True, text=True, cwd=aligner_script_dir
+    )
+    output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
+    output_fn = "/" + output_fn.split("//")[-1]
+    return output_fn
 
 
 def align(file_urls):
@@ -30,14 +37,8 @@ def align(file_urls):
         output_dir = Path(tmpdir)
         bo_fn = download_file(file_urls["bo_file_url"], output_dir)
         en_fn = download_file(file_urls["en_file_url"], output_dir)
-        # aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
-
-        cmd = ["/app/align_tib_en.sh", bo_fn, en_fn, output_dir]
-        output = subprocess.run(
-            cmd, check=True, capture_output=True, text=True, cwd="/app"
-        )
-        output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
-        return output.stderr + output.stdout
+        aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
+        return Path(aligned_fn).read_text()
 
 
 if DEV:
