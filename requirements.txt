@@ -1,3 +1,5 @@
--r tibetan-aligner/requirements.txt
+sentence-transformers==2.2.2
+pyewts==0.2.0
+Cython==0.29.34
 gradio==3.24.1
 requests==2.28.2
