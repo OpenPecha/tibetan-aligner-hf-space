@@ -12,19 +12,28 @@ GITHUB_EMAIL = os.getenv("GITHUB_EMAIL")
 GITHUB_ORG = os.getenv("MAI_GITHUB_ORG")
 GITHUB_API_ENDPOINT = f"https://api.github.com/orgs/{GITHUB_ORG}/repos"
 
+DEBUG = os.getenv("DEBUG", False)
+
+quiet = "-q" if DEBUG else ""
+
 
 def create_github_repo(repo_path: Path, repo_name: str):
+    if DEBUG:
+        print("[INFO] Creating GitHub repo...")
+
     # configure git users
     subprocess.run(f"git config --global user.name {GITHUB_USERNAME}", shell=True)
     subprocess.run(f"git config --global user.email {GITHUB_EMAIL}", shell=True)
 
     # Initialize a Git repository
-    subprocess.run("git init", cwd=str(repo_path), shell=True)
+    subprocess.run(f"git init {quiet}", cwd=str(repo_path), shell=True)
     subprocess.run("git branch -m main", cwd=str(repo_path), shell=True)
 
     # Commit the changes
     subprocess.run("git add . ", cwd=str(repo_path), shell=True)
-    subprocess.run("git commit -m 'Initial commit'", cwd=str(repo_path), shell=True)
+    subprocess.run(
+        f"git commit {quiet} -m 'Initial commit'", cwd=str(repo_path), shell=True
+    )
 
     # Create a new repository on GitHub
     response = requests.post(
@@ -42,16 +51,13 @@ def create_github_repo(repo_path: Path, repo_name: str):
     subprocess.run(
         f"git remote add origin {remote_url}", cwd=str(repo_path), shell=True
     )
-    subprocess.run("git push -u origin main", cwd=str(repo_path), shell=True)
+    subprocess.run(f"git push {quiet} -u origin main", cwd=str(repo_path), shell=True)
+
+    return response.json()["html_url"]
 
 
 def get_github_repo_name():
-    """Generate Repo name
-
-    TODO:
-        - generate a repo name with TM0001 format
-        - repo name shouldn't exist on GitHub
-    """
+    """Generate TM Repo name"""
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"token {GITHUB_ACCESS_TOKEN}",
@@ -72,6 +78,9 @@ def get_github_repo_name():
 
 
 def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
+    if DEBUG:
+        print("[INFO] Conerting raw alignment to TM repo...")
+
     def bo_post_process(text: str):
         return text.replace("།།", "། །")
 
@@ -88,7 +97,8 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
                 try:
                     bo_seg, en_seg = seg_pair.split("\t", 1)
                 except Exception as e:
-                    print(f"Error: {e} in {fn}")
+                    if DEBUG:
+                        print(f"Error: {e} in {fn}")
                     raise
 
             else:
@@ -109,14 +119,17 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     return tm_path
 
 
-def create_tm(align_fn):
+def create_tm(align_fn: Path):
+    align_fn = Path(align_fn)
     output_dir = align_fn.parent
 
     repo_name = get_github_repo_name()
     tm_path = output_dir / repo_name
     tm_path.mkdir(exist_ok=True, parents=True)
     tm_path = convert_raw_align_to_tm(align_fn, tm_path)
-    create_github_repo(tm_path, repo_name)
+    repo_url = create_github_repo(tm_path, repo_name)
+    print(f"[INFO] TM repo created: {repo_url}")
+    return repo_url
 
 
 if __name__ == "__main__":

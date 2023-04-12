@@ -3,13 +3,14 @@ import re
 import shutil
 import stat
 import subprocess
-import tempfile
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
 
 import gradio as gr
 import requests
+
+from tm import create_tm
 
 ALIGNER_SCRIPT_DIR = Path("./tibetan-aligner").resolve()
 ALIGNER_SCRIPT_NAME = "align_tib_en.sh"
@@ -52,8 +53,8 @@ def download_file(url, output_path=Path("./data")):
 
 
 def _run_align_script(bo_fn, en_fn, output_dir):
+    print("[INFO] Running aligner...")
     cmd = [str(ALIGNER_SCRIPT_PATH), str(bo_fn), str(en_fn), str(output_dir)]
-    print(cmd)
     output = subprocess.run(
         cmd, check=True, capture_output=True, text=True, cwd=str(ALIGNER_SCRIPT_DIR)
     )
@@ -68,7 +69,8 @@ def align(file_urls):
         bo_fn = download_file(file_urls["bo_file_url"], output_dir)
         en_fn = download_file(file_urls["en_file_url"], output_dir)
         aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
-        return Path(aligned_fn).read_text()
+        repo_url = create_tm(aligned_fn)
+        return {"tm_repo_url": repo_url}
 
 
 with gr.Blocks() as demo:
@@ -78,7 +80,7 @@ with gr.Blocks() as demo:
             "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt",
         }
     )
-    output = gr.TextArea()
+    output = gr.JSON()
     align_btn = gr.Button("Align")
     align_btn.click(
         fn=align,
