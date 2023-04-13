@@ -27,7 +27,6 @@ def create_github_repo(repo_path: Path, repo_name: str):
 
     # Initialize a Git repository
     subprocess.run(f"git init {quiet}", cwd=str(repo_path), shell=True)
-    subprocess.run("git branch -m main", cwd=str(repo_path), shell=True)
 
     # Commit the changes
     subprocess.run("git add . ", cwd=str(repo_path), shell=True)
@@ -51,6 +50,8 @@ def create_github_repo(repo_path: Path, repo_name: str):
     subprocess.run(
         f"git remote add origin {remote_url}", cwd=str(repo_path), shell=True
     )
+    # rename default branch to main
+    subprocess.run("git branch -M main", cwd=str(repo_path), shell=True)
     subprocess.run(f"git push {quiet} -u origin main", cwd=str(repo_path), shell=True)
 
     return response.json()["html_url"]
