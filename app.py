@@ -12,6 +12,8 @@ import requests
 
 from tm import create_tm
 
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
 ALIGNER_SCRIPT_DIR = Path("./tibetan-aligner").resolve()
 ALIGNER_SCRIPT_NAME = "align_tib_en.sh"
 ALIGNER_SCRIPT_PATH = ALIGNER_SCRIPT_DIR / ALIGNER_SCRIPT_NAME
@@ -41,6 +43,20 @@ def TemporaryDirectory():
         shutil.rmtree(str(tmpdir))
 
 
+def get_file_content_from_github(file_url: str, output_fn) -> Path:
+    # Set up the GitHub API headers
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json",
+    }
+    with requests.get(file_url, headers=headers, stream=True) as r:
+        r.raise_for_status()
+        with open(output_fn, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+    return output_fn
+
+
 def download_file(url, output_path=Path("./data")):
     output_path.mkdir(parents=True, exist_ok=True)
     local_filename = output_path / url.split("/")[-1]
@@ -63,19 +79,24 @@ def _run_align_script(bo_fn, en_fn, output_dir):
     return output_fn
 
 
-def align(file_urls):
+def align(text_pair):
     with TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
-        bo_fn = download_file(file_urls["bo_file_url"], output_dir)
-        en_fn = download_file(file_urls["en_file_url"], output_dir)
+        bo_fn = download_file(
+            text_pair["bo_file_url"], output_path=output_dir / "bo.tx"
+        )
+        en_fn = download_file(
+            text_pair["en_file_url"], output_path=output_dir / "en.tx"
+        )
         aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
-        repo_url = create_tm(aligned_fn)
+        repo_url = create_tm(aligned_fn, text_id=text_pair["text_id"])
         return {"tm_repo_url": repo_url}
 
 
 with gr.Blocks() as demo:
     input = gr.JSON(
         value={
+            "text_id": f"EN{uuid.uuid4().hex[:4]}",
             "bo_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-bo.txt",
             "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt",
         }

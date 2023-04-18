@@ -120,11 +120,11 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     return tm_path
 
 
-def create_tm(align_fn: Path):
+def create_tm(align_fn: Path, text_id: str):
     align_fn = Path(align_fn)
     output_dir = align_fn.parent
 
-    repo_name = get_github_repo_name()
+    repo_name = f"TM{text_id}"
     tm_path = output_dir / repo_name
     tm_path.mkdir(exist_ok=True, parents=True)
     tm_path = convert_raw_align_to_tm(align_fn, tm_path)
