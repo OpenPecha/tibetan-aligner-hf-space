@@ -96,7 +96,7 @@ def align(text_pair):
 with gr.Blocks() as demo:
     input = gr.JSON(
         value={
-            "text_id": f"EN{uuid.uuid4().hex[:4]}",
+            "text_id": f"{uuid.uuid4().hex[:4]}",
             "bo_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-bo.txt",
             "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt",
         }
