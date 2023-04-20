@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -11,6 +12,8 @@ import gradio as gr
 import requests
 
 from tm import create_tm
+
+logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO)
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
@@ -59,7 +62,6 @@ def download_file(github_file_url: str, output_fn) -> Path:
 
 
 def _run_align_script(bo_fn, en_fn, output_dir):
-    print("[INFO] Running aligner...")
     cmd = [str(ALIGNER_SCRIPT_PATH), str(bo_fn), str(en_fn), str(output_dir)]
     output = subprocess.run(
         cmd, check=True, capture_output=True, text=True, cwd=str(ALIGNER_SCRIPT_DIR)
@@ -70,14 +72,12 @@ def _run_align_script(bo_fn, en_fn, output_dir):
 
 
 def align(text_pair):
+    logging.info(f"Running aligner on MT{text_pair['text_id']}")
+    return {}
     with TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
-        bo_fn = download_file(
-            text_pair["bo_file_url"], output_fn=output_dir / "bo.tx"
-        )
-        en_fn = download_file(
-            text_pair["en_file_url"], output_fn=output_dir / "en.tx"
-        )
+        bo_fn = download_file(text_pair["bo_file_url"], output_fn=output_dir / "bo.tx")
+        en_fn = download_file(text_pair["en_file_url"], output_fn=output_dir / "en.tx")
         aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
         repo_url = create_tm(aligned_fn, text_id=text_pair["text_id"])
         return {"tm_repo_url": repo_url}
