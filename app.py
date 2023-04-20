@@ -43,29 +43,19 @@ def TemporaryDirectory():
         shutil.rmtree(str(tmpdir))
 
 
-def get_file_content_from_github(file_url: str, output_fn) -> Path:
-    # Set up the GitHub API headers
+def download_file(github_file_url: str, output_fn) -> Path:
+    """Download file from github"""
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github+json",
     }
-    with requests.get(file_url, headers=headers, stream=True) as r:
+    authenticated_file_url = f"{github_file_url}?token={GITHUB_TOKEN}"
+    with requests.get(authenticated_file_url, headers=headers, stream=True) as r:
         r.raise_for_status()
         with open(output_fn, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
     return output_fn
-
-
-def download_file(url, output_path=Path("./data")):
-    output_path.mkdir(parents=True, exist_ok=True)
-    local_filename = output_path / url.split("/")[-1]
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                f.write(chunk)
-    return local_filename
 
 
 def _run_align_script(bo_fn, en_fn, output_dir):
@@ -83,10 +73,10 @@ def align(text_pair):
     with TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
         bo_fn = download_file(
-            text_pair["bo_file_url"], output_path=output_dir / "bo.tx"
+            text_pair["bo_file_url"], output_fn=output_dir / "bo.tx"
         )
         en_fn = download_file(
-            text_pair["en_file_url"], output_path=output_dir / "en.tx"
+            text_pair["en_file_url"], output_fn=output_dir / "en.tx"
         )
         aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
         repo_url = create_tm(aligned_fn, text_id=text_pair["text_id"])
@@ -94,6 +84,8 @@ def align(text_pair):
 
 
 with gr.Blocks() as demo:
+    gr.Markdown("## Tibetan-English Aligner API")
+    gr.Markdown("Please use Via API")
     input = gr.JSON(
         value={
             "text_id": f"{uuid.uuid4().hex[:4]}",
