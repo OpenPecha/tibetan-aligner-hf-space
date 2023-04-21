@@ -66,7 +66,12 @@ def _run_align_script(bo_fn, en_fn, output_dir):
     start = time.time()
     cmd = [str(ALIGNER_SCRIPT_PATH), str(bo_fn), str(en_fn), str(output_dir)]
     output = subprocess.run(
-        cmd, check=True, capture_output=True, text=True, cwd=str(ALIGNER_SCRIPT_DIR)
+        cmd,
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=str(ALIGNER_SCRIPT_DIR),
+        shell=True,
     )
     output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
     output_fn = "/" + output_fn.split("//")[-1]

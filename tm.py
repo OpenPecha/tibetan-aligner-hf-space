@@ -19,20 +19,19 @@ quiet = "-q" if DEBUG else ""
 
 
 def create_github_repo(repo_path: Path, repo_name: str):
-    if DEBUG:
-        print("[INFO] Creating GitHub repo...")
+    logging.info("[INFO] Creating GitHub repo...")
 
     # configure git users
-    subprocess.run(f"git config --global user.name {GITHUB_USERNAME}", shell=True)
-    subprocess.run(f"git config --global user.email {GITHUB_EMAIL}", shell=True)
+    subprocess.run(f"git config --global user.name {GITHUB_USERNAME}".split())
+    subprocess.run(f"git config --global user.email {GITHUB_EMAIL}".split())
 
     # Initialize a Git repository
-    subprocess.run(f"git init {quiet}", cwd=str(repo_path), shell=True)
+    subprocess.run(f"git init {quiet}".split(), cwd=str(repo_path))
 
     # Commit the changes
-    subprocess.run("git add . ", cwd=str(repo_path), shell=True)
+    subprocess.run("git add . ".split(), cwd=str(repo_path))
     subprocess.run(
-        f"git commit {quiet} -m 'Initial commit'", cwd=str(repo_path), shell=True
+        f"git commit {quiet} -m".split() + ["Initial commit"], cwd=str(repo_path)
     )
 
     # Create a new repository on GitHub
@@ -52,31 +51,10 @@ def create_github_repo(repo_path: Path, repo_name: str):
         f"git remote add origin {remote_url}", cwd=str(repo_path), shell=True
     )
     # rename default branch to main
-    subprocess.run("git branch -M main", cwd=str(repo_path), shell=True)
-    subprocess.run(f"git push {quiet} -u origin main", cwd=str(repo_path), shell=True)
+    subprocess.run("git branch -M main".split(), cwd=str(repo_path))
+    subprocess.run(f"git push {quiet} -u origin main".split(), cwd=str(repo_path))
 
     return response.json()["html_url"]
-
-
-def get_github_repo_name():
-    """Generate TM Repo name"""
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "Authorization": f"token {GITHUB_ACCESS_TOKEN}",
-    }
-
-    def repo_exists(repo_name):
-        url = f"{GITHUB_API_ENDPOINT}/{repo_name}"
-        response = requests.get(url, headers=headers)
-        return response.status_code == 200
-
-    for _ in range(10000):  # Limit to a maximum number of attempts
-        i = random.randint(1, 9999)
-        repo_name = f"TM{str(i).zfill(4)}"
-        if not repo_exists(repo_name):
-            return repo_name
-
-    raise Exception("Unable to find a unique repo name. Please try again.")
 
 
 def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
@@ -99,8 +77,7 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
                 try:
                     bo_seg, en_seg = seg_pair.split("\t", 1)
                 except Exception as e:
-                    if DEBUG:
-                        print(f"Error: {e} in {fn}")
+                    logging.error(f"{e} in {fn}")
                     raise
 
             else:
