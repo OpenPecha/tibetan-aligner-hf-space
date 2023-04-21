@@ -1,8 +1,8 @@
 import logging
 import os
-import random
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import requests
@@ -100,14 +100,14 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
 
 def create_tm(align_fn: Path, text_id: str):
     align_fn = Path(align_fn)
-    output_dir = align_fn.parent
-
-    repo_name = f"TM{text_id}"
-    tm_path = output_dir / repo_name
-    tm_path.mkdir(exist_ok=True, parents=True)
-    tm_path = convert_raw_align_to_tm(align_fn, tm_path)
-    repo_url = create_github_repo(tm_path, repo_name)
-    logging.info(f"[INFO] TM repo created: {repo_url}")
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        output_dir = Path(tmp_dir)
+        repo_name = f"TM{text_id}"
+        tm_path = output_dir / repo_name
+        tm_path.mkdir(exist_ok=True, parents=True)
+        tm_path = convert_raw_align_to_tm(align_fn, tm_path)
+        repo_url = create_github_repo(tm_path, repo_name)
+        logging.info(f"[INFO] TM repo created: {repo_url}")
     return repo_url
 
 
