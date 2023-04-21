@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import subprocess
@@ -80,7 +81,7 @@ def get_github_repo_name():
 
 def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     if DEBUG:
-        print("[INFO] Conerting raw alignment to TM repo...")
+        logging.debug("[INFO] Conerting raw alignment to TM repo...")
 
     def bo_post_process(text: str):
         return text.replace("།།", "། །")
@@ -129,7 +130,7 @@ def create_tm(align_fn: Path, text_id: str):
     tm_path.mkdir(exist_ok=True, parents=True)
     tm_path = convert_raw_align_to_tm(align_fn, tm_path)
     repo_url = create_github_repo(tm_path, repo_name)
-    print(f"[INFO] TM repo created: {repo_url}")
+    logging.info(f"[INFO] TM repo created: {repo_url}")
     return repo_url
 
 
