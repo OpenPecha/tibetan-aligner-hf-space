@@ -4,6 +4,7 @@ import re
 import shutil
 import stat
 import subprocess
+import time
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
@@ -62,12 +63,16 @@ def download_file(github_file_url: str, output_fn) -> Path:
 
 
 def _run_align_script(bo_fn, en_fn, output_dir):
+    start = time.time()
     cmd = [str(ALIGNER_SCRIPT_PATH), str(bo_fn), str(en_fn), str(output_dir)]
     output = subprocess.run(
         cmd, check=True, capture_output=True, text=True, cwd=str(ALIGNER_SCRIPT_DIR)
     )
     output_fn = re.search(r"\[OUTPUT\] (.*)", output.stdout).group(1)
     output_fn = "/" + output_fn.split("//")[-1]
+    end = time.time()
+    total_time = round((end - start) / 60, 2)
+    logging.info(f"Total time taken for Aligning: {total_time} mins")
     return output_fn
 
 
