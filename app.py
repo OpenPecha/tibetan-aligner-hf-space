@@ -81,7 +81,7 @@ def _run_align_script(bo_fn, en_fn, output_dir):
 
 
 def align(text_pair):
-    logging.info(f"Running aligner on MT{text_pair['text_id']}")
+    logging.info(f"Running aligner for TM{text_pair['text_id']}...")
     with TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
         bo_fn = download_file(text_pair["bo_file_url"], output_fn=output_dir / "bo.tx")
