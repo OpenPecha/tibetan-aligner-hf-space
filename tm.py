@@ -106,7 +106,7 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
 def get_github_dev_url(raw_github_url: str) -> str:
     base_url = "https://github.dev"
     _, file_path = raw_github_url.split(".com")
-    blob_file_path = file_path.replace("main", "main/blob")
+    blob_file_path = file_path.replace("main", "blob/main")
     return base_url + blob_file_path
 
 
@@ -115,11 +115,7 @@ def add_input_in_readme(input_dict: Dict[str, str], path: Path) -> Path:
     text_id = input_dict["text_id"]
     bo_file_url = get_github_dev_url(input_dict["bo_file_url"])
     en_file_url = get_github_dev_url(input_dict["en_file_url"])
-    input_string = """
-    ## Input
-    - [BO{}]({})
-    - [EN{}]({})
-    """.format(
+    input_string = "## Input\n- [BO{}]({})\n- [EN{}]({})".format(
         text_id, bo_file_url, text_id, en_file_url
     )
 
