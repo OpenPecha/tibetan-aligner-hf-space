@@ -103,14 +103,28 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     return tm_path
 
 
-def create_input_json(input_dict: Dict[str, str], path: Path) -> Path:
-    input_json_fn = path / "input.json"
-    json.dump(
-        input_dict,
-        input_json_fn.open("w", encoding="utf-8"),
-        ensure_ascii=False,
-        indent=2,
+def get_github_dev_url(raw_github_url: str) -> str:
+    base_url = "https://github.dev"
+    _, file_path = raw_github_url.split(".com")
+    blob_file_path = file_path.replace("main", "main/blob")
+    return base_url + blob_file_path
+
+
+def add_input_in_readme(input_dict: Dict[str, str], path: Path) -> Path:
+    input_readme_fn = path / "README.md"
+    text_id = input_dict["text_id"]
+    bo_file_url = get_github_dev_url(input_dict["bo_file_url"])
+    en_file_url = get_github_dev_url(input_dict["en_file_url"])
+    input_string = """
+    ## Input
+    - [BO{}]({})
+    - [EN{}]({})
+    """.format(
+        text_id, bo_file_url, text_id, en_file_url
     )
+
+    input_readme_fn.write_text(input_string)
+
     return path
 
 
@@ -123,7 +137,7 @@ def create_tm(align_fn: Path, text_pair: Dict[str, str]):
         tm_path = output_dir / repo_name
         tm_path.mkdir(exist_ok=True, parents=True)
         repo_path = convert_raw_align_to_tm(align_fn, tm_path)
-        repo_path = create_input_json(text_pair, tm_path)
+        repo_path = add_input_in_readme(text_pair, tm_path)
         repo_url = create_github_repo(repo_path, repo_name)
         logging.info(f"TM repo created: {repo_url}")
     return repo_url
