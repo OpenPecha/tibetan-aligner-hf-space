@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import requests
@@ -44,6 +45,8 @@ def create_github_repo(repo_path: Path, repo_name: str):
         auth=(GITHUB_USERNAME, GITHUB_ACCESS_TOKEN),
     )
     response.raise_for_status()
+
+    time.sleep(3)
 
     # Add the GitHub remote to the local Git repository and push the changes
     remote_url = f"https://{GITHUB_ORG}:{GITHUB_ACCESS_TOKEN}@github.com/MonlamAI/{repo_name}.git"
