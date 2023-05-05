@@ -87,7 +87,7 @@ def align(text_pair):
         bo_fn = download_file(text_pair["bo_file_url"], output_fn=output_dir / "bo.tx")
         en_fn = download_file(text_pair["en_file_url"], output_fn=output_dir / "en.tx")
         aligned_fn = _run_align_script(bo_fn, en_fn, output_dir)
-        repo_url = create_tm(aligned_fn, text_id=text_pair["text_id"])
+        repo_url = create_tm(aligned_fn, text_pair=text_pair)
         return {"tm_repo_url": repo_url}
 
 

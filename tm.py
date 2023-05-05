@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import subprocess
@@ -5,6 +6,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from typing import Dict
 
 import requests
 
@@ -101,16 +103,29 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     return tm_path
 
 
-def create_tm(align_fn: Path, text_id: str):
+def create_input_json(input_dict: Dict[str, str], path: Path) -> Path:
+    input_json_fn = path / "input.json"
+    json.dump(
+        input_dict,
+        input_json_fn.open("w", encoding="utf-8"),
+        ensure_ascii=False,
+        indent=2,
+    )
+    return path
+
+
+def create_tm(align_fn: Path, text_pair: Dict[str, str]):
     align_fn = Path(align_fn)
+    text_id = text_pair["text_id"]
     with tempfile.TemporaryDirectory() as tmp_dir:
         output_dir = Path(tmp_dir)
         repo_name = f"TM{text_id}"
         tm_path = output_dir / repo_name
         tm_path.mkdir(exist_ok=True, parents=True)
-        tm_path = convert_raw_align_to_tm(align_fn, tm_path)
-        repo_url = create_github_repo(tm_path, repo_name)
-        logging.info(f"[INFO] TM repo created: {repo_url}")
+        repo_path = convert_raw_align_to_tm(align_fn, tm_path)
+        repo_path = create_input_json(text_pair, tm_path)
+        repo_url = create_github_repo(repo_path, repo_name)
+        logging.info(f"TM repo created: {repo_url}")
     return repo_url
 
 
