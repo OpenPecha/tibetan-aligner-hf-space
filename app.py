@@ -95,11 +95,11 @@ with gr.Blocks() as demo:
     gr.Markdown("## Tibetan-English Aligner API")
     gr.Markdown("Please use Via API")
     input = gr.JSON(
-        # value={
-        #     "text_id": f"{uuid.uuid4().hex[:4]}",
-        #     "bo_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-bo.txt",
-        #     "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt",
-        # }
+        value={
+            "text_id": f"{uuid.uuid4().hex[:4]}",
+            "bo_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-bo.txt",
+            "en_file_url": "https://raw.githubusercontent.com/OpenPecha/tibetan-aligner/main/tests/data/text-en.txt",
+        }
     )
     output = gr.JSON()
     align_btn = gr.Button("Align")
