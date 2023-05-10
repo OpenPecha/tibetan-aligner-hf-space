@@ -66,9 +66,6 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
     if DEBUG:
         logging.debug("[INFO] Conerting raw alignment to TM repo...")
 
-    def bo_post_process(text: str):
-        return text.replace("།།", "། །")
-
     def load_alignment(fn: Path):
         content = fn.read_text()
         if not content:
@@ -88,7 +85,7 @@ def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
             else:
                 bo_seg = seg_pair
                 en_seg = "\n"
-            yield bo_post_process(bo_seg), en_seg
+            yield bo_seg, en_seg
 
     text_bo_fn = tm_path / f"{tm_path.name}-bo.txt"
     text_en_fn = tm_path / f"{tm_path.name}-en.txt"
