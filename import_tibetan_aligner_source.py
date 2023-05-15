@@ -12,6 +12,7 @@ NON_SOURCES_FILES = [
     ".idea",
     "Dockerfile",
     "__pycache__",
+    "tests",
 ]
 
 if __name__ == "__main__":
