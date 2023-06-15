@@ -51,7 +51,7 @@ def create_github_repo(repo_path: Path, repo_name: str):
     time.sleep(3)
 
     # Add the GitHub remote to the local Git repository and push the changes
-    remote_url = f"https://{GITHUB_ORG}:{GITHUB_ACCESS_TOKEN}@github.com/MonlamAI/{repo_name}.git"
+    remote_url = f"https://{GITHUB_ORG}:{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_ORG}/{repo_name}.git"
     subprocess.run(
         f"git remote add origin {remote_url}", cwd=str(repo_path), shell=True
     )
