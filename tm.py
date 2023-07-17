@@ -14,6 +14,7 @@ GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
 GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_EMAIL = os.getenv("GITHUB_EMAIL")
 GITHUB_ORG = os.getenv("MAI_GITHUB_ORG")
+MAI_TM_PUBLISH_TODO_REPO = os.environ["MAI_TMS_PUBLISH_TODO_REPO"]
 GITHUB_API_ENDPOINT = f"https://api.github.com/orgs/{GITHUB_ORG}/repos"
 
 DEBUG = os.getenv("DEBUG", False)
@@ -120,6 +121,32 @@ def add_input_in_readme(input_dict: Dict[str, str], path: Path) -> Path:
 
     return path
 
+def add_to_publish_todo_repo(org, repo_name, file_path, access_token):
+    base_url = f"https://api.github.com/repos/{org}/{repo_name}/contents/"
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+
+    url = base_url + file_path
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        print(f"[INFO] '{file_path}' already added.")
+        return
+
+    payload = {"message": f"Add {file_path}", "content": ""}
+
+    response = requests.put(url, headers=headers, json=payload)
+
+    if response.status_code == 201:
+        print(f"[INFO] '{file_path}' added to publish todo")
+    else:
+        print(f"[ERROR] Failed to add '{file_path}'.")
+        print(f"[ERROR] Response: {response.text}")
+
 
 def create_tm(align_fn: Path, text_pair: Dict[str, str]):
     align_fn = Path(align_fn)
@@ -133,6 +160,7 @@ def create_tm(align_fn: Path, text_pair: Dict[str, str]):
         repo_path = add_input_in_readme(text_pair, tm_path)
         repo_url = create_github_repo(repo_path, repo_name)
         logging.info(f"TM repo created: {repo_url}")
+        add_to_publish_todo_repo(GITHUB_ORG, MAI_TM_PUBLISH_TODO_REPO, repo_name, GITHUB_ACCESS_TOKEN)
     return repo_url
 
 
