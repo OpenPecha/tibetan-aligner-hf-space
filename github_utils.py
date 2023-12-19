@@ -84,7 +84,9 @@ def commit_to_orphan_branch(repo_path, new_branch, files_to_add, commit_message)
 
     # Add the specified files
     for file in files_to_add:
-        subprocess.run(["git", "add", file], check=True)
+        dst_file = repo_path / file.name
+        file.rename(dst_file)
+        subprocess.run(["git", "add", file.name], check=True)
 
     # Commit the changes
     subprocess.run(["git", "commit", "-m", commit_message], check=True)
@@ -101,5 +103,13 @@ def repo_exists(repo_name):
 
 def clone_repo(repo_name: str, output_dir: Path):
     remote_url = get_remote_url(repo_name)
-    subprocess.run(["git", "clone", remote_url, output_dir], check=True)
+    repo_path = output_dir / repo_name
+    repo_path.mkdir(exist_ok=True, parents=True)
+    subprocess.run(["git", "clone", remote_url, repo_path], check=True)
     return output_dir / repo_name
+
+
+def get_branches(repo_name: str):
+    repo_url = f"{GITHUB_API_BASE_URL}/repos/{GITHUB_ORG}/{repo_name}/branches"
+    r = requests.get(repo_url, auth=(GITHUB_USERNAME, GITHUB_ACCESS_TOKEN))
+    return [b["name"] for b in r.json()]
