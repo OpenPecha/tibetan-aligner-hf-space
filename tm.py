@@ -1,17 +1,15 @@
 import logging
 import os
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Dict
 
-import requests
-
 from .github_utils import (
     clone_repo,
     commit_to_orphan_branch,
     create_github_repo,
+    get_branches,
     repo_exits,
 )
 
@@ -84,6 +82,16 @@ def tm_exists(tm_id):
 def download_tm(tm_id: str, output_dir: Path):
     tm_path = clone_repo(tm_id, output_dir)
     return tm_path
+
+
+def get_next_version(tm_id: str):
+    branches = get_branches(tm_id)
+    versions = [b for b in branches if b.startswith("v")]
+    if not versions:
+        return "v1"
+    else:
+        sorted_versions = sorted(versions)
+        return f"v{int(sorted_versions[-1][1:]) + 1}"
 
 
 def create_tm(align_fn: Path, text_pair: Dict[str, str]):
