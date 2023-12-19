@@ -1,65 +1,21 @@
-import json
 import logging
 import os
 import subprocess
 import sys
 import tempfile
-import time
 from pathlib import Path
 from typing import Dict
 
 import requests
 
-GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
-GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_TOKEN")
-GITHUB_EMAIL = os.getenv("GITHUB_EMAIL")
-GITHUB_ORG = os.getenv("MAI_GITHUB_ORG")
-GITHUB_API_ENDPOINT = f"https://api.github.com/orgs/{GITHUB_ORG}/repos"
+from .github_utils import (
+    clone_repo,
+    commit_to_orphan_branch,
+    create_github_repo,
+    repo_exits,
+)
 
 DEBUG = os.getenv("DEBUG", False)
-
-quiet = "-q" if DEBUG else ""
-
-
-def create_github_repo(repo_path: Path, repo_name: str):
-    logging.info("[INFO] Creating GitHub repo...")
-
-    # configure git users
-    subprocess.run(f"git config --global user.name {GITHUB_USERNAME}".split())
-    subprocess.run(f"git config --global user.email {GITHUB_EMAIL}".split())
-
-    # Initialize a Git repository
-    subprocess.run(f"git init {quiet}".split(), cwd=str(repo_path))
-
-    # Commit the changes
-    subprocess.run("git add . ".split(), cwd=str(repo_path))
-    subprocess.run(
-        f"git commit {quiet} -m".split() + ["Initial commit"], cwd=str(repo_path)
-    )
-
-    # Create a new repository on GitHub
-    response = requests.post(
-        GITHUB_API_ENDPOINT,
-        json={
-            "name": repo_name,
-            "private": True,
-        },
-        auth=(GITHUB_USERNAME, GITHUB_ACCESS_TOKEN),
-    )
-    response.raise_for_status()
-
-    time.sleep(3)
-
-    # Add the GitHub remote to the local Git repository and push the changes
-    remote_url = f"https://{GITHUB_ORG}:{GITHUB_ACCESS_TOKEN}@github.com/{GITHUB_ORG}/{repo_name}.git"
-    subprocess.run(
-        f"git remote add origin {remote_url}", cwd=str(repo_path), shell=True
-    )
-    # rename default branch to main
-    subprocess.run("git branch -M main".split(), cwd=str(repo_path))
-    subprocess.run(f"git push {quiet} -u origin main".split(), cwd=str(repo_path))
-
-    return response.json()["html_url"]
 
 
 def convert_raw_align_to_tm(align_fn: Path, tm_path: Path):
@@ -121,19 +77,34 @@ def add_input_in_readme(input_dict: Dict[str, str], path: Path) -> Path:
     return path
 
 
+def tm_exists(tm_id):
+    return repo_exits(tm_id)
+
+
+def download_tm(tm_id: str, output_dir: Path):
+    tm_path = clone_repo(tm_id, output_dir)
+    return tm_path
+
+
 def create_tm(align_fn: Path, text_pair: Dict[str, str]):
     align_fn = Path(align_fn)
     text_id = text_pair["text_id"]
     with tempfile.TemporaryDirectory() as tmp_dir:
         output_dir = Path(tmp_dir)
-        repo_name = f"TM{text_id}"
-        tm_path = output_dir / repo_name
+        tm_id = f"TM{text_id}"
+        tm_path = output_dir / tm_id
         tm_path.mkdir(exist_ok=True, parents=True)
-        repo_path = convert_raw_align_to_tm(align_fn, tm_path)
-        repo_path = add_input_in_readme(text_pair, tm_path)
-        repo_url = create_github_repo(repo_path, repo_name)
-        logging.info(f"TM repo created: {repo_url}")
-    return repo_url
+        tm_path = convert_raw_align_to_tm(align_fn, tm_path)
+        tm_path = add_input_in_readme(text_pair, tm_path)
+        if tm_exists(tm_id):
+            tm_path = download_tm(tm_id, output_dir)
+            next_version = get_next_version(tm_path)
+            commit_to_orphan_branch(
+                tm_path, next_version, [str(tm_path / "README.md")], "update README.md"
+            )
+        tm_url = create_github_repo(repo_path=tm_path, repo_name=tm_id)
+        logging.info(f"TM repo created: {tm_url}")
+    return tm_url
 
 
 if __name__ == "__main__":
