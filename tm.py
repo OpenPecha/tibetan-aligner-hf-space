@@ -5,12 +5,12 @@ import tempfile
 from pathlib import Path
 from typing import Dict
 
-from .github_utils import (
+from github_utils import (
     clone_repo,
     commit_to_orphan_branch,
     create_github_repo,
     get_branches,
-    repo_exits,
+    repo_exists,
 )
 
 DEBUG = os.getenv("DEBUG", False)
@@ -76,7 +76,7 @@ def add_input_in_readme(input_dict: Dict[str, str], path: Path) -> Path:
 
 
 def tm_exists(tm_id):
-    return repo_exits(tm_id)
+    return repo_exists(tm_id)
 
 
 def download_tm(tm_id: str, output_dir: Path):
