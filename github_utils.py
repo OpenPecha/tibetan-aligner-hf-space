@@ -94,6 +94,8 @@ def commit_to_orphan_branch(repo_path, new_branch, files_to_add, commit_message)
     # Push the branch to the remote repository
     subprocess.run(["git", "push", "origin", new_branch], check=True)
 
+    return f"https://github.com/{GITHUB_ORG}/{repo_path.name}/tree/{new_branch}"
+
 
 def repo_exists(repo_name):
     repo_url = f"{GITHUB_API_BASE_URL}/repos/{GITHUB_ORG}/{repo_name}"

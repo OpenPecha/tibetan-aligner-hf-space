@@ -105,13 +105,20 @@ def create_tm(align_fn: Path, text_pair: Dict[str, str]):
         tm_path = convert_raw_align_to_tm(align_fn, tm_path)
         tm_path = add_input_in_readme(text_pair, tm_path)
         if tm_exists(tm_id):
-            tm_path = download_tm(tm_id, output_dir)
-            next_version = get_next_version(tm_path)
-            commit_to_orphan_branch(
-                tm_path, next_version, [str(tm_path / "README.md")], "update README.md"
+            cloned_output_dir = output_dir / "cloned"
+            cloned_output_dir.mkdir(exist_ok=True, parents=True)
+            tm_repo_path = download_tm(tm_id, cloned_output_dir)
+            next_version = get_next_version(tm_id)
+            tm_url = commit_to_orphan_branch(
+                tm_repo_path,
+                next_version,
+                tm_path.iterdir(),
+                f"add new alignment {next_version}",
             )
-        tm_url = create_github_repo(repo_path=tm_path, repo_name=tm_id)
-        logging.info(f"TM repo created: {tm_url}")
+            logging.info(f"Add new alignment {next_version} to {tm_id}, link: {tm_url}")
+        else:
+            tm_url = create_github_repo(repo_path=tm_path, repo_name=tm_id)
+            logging.info(f"{tm_id} created, link: {tm_url}")
     return tm_url
 
 
