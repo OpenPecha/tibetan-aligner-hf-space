@@ -7,6 +7,7 @@ from typing import Dict
 
 from github_utils import (
     clone_repo,
+    commit_and_push,
     commit_to_orphan_branch,
     create_github_repo,
     get_branches,
@@ -108,17 +109,16 @@ def create_tm(align_fn: Path, text_pair: Dict[str, str]):
             cloned_output_dir = output_dir / "cloned"
             cloned_output_dir.mkdir(exist_ok=True, parents=True)
             tm_repo_path = download_tm(tm_id, cloned_output_dir)
-            next_version = get_next_version(tm_id)
-            tm_url = commit_to_orphan_branch(
-                tm_repo_path,
-                next_version,
-                tm_path.iterdir(),
-                f"add new alignment {next_version}",
+            tm_url = commit_and_push(
+                repo_path=tm_repo_path,
+                branch="main",
+                files_to_add=tm_path.iterdir(),
+                commit_message=f"update alignment",
             )
-            logging.info(f"Add new alignment {next_version} to {tm_id}, link: {tm_url}")
+            logging.info(f"Update alignment for {tm_id}")
         else:
             tm_url = create_github_repo(repo_path=tm_path, repo_name=tm_id)
-            logging.info(f"{tm_id} created, link: {tm_url}")
+            logging.info(f"New {tm_id} created")
     return tm_url
 
 

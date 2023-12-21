@@ -97,6 +97,34 @@ def commit_to_orphan_branch(repo_path, new_branch, files_to_add, commit_message)
     return f"https://github.com/{GITHUB_ORG}/{repo_path.name}/tree/{new_branch}"
 
 
+def commit_and_push(repo_path, branch, files_to_add, commit_message):
+    """
+    Commit and push changes to a Git repository.
+
+    Parameters:
+    - repo_path: Path to the local Git repository.
+    - files_to_add: List of file paths to add to the new branch.
+    - commit_message: Commit message.
+    """
+
+    # Change to the repository directory
+    os.chdir(repo_path)
+
+    # Add the specified files
+    for file in files_to_add:
+        dst_file = repo_path / file.name
+        file.rename(dst_file)
+        subprocess.run(["git", "add", file.name], check=True)
+
+    # Commit the changes
+    subprocess.run(["git", "commit", "-m", commit_message], check=True)
+
+    # Push the branch to the remote repository
+    subprocess.run(["git", "push", "origin", branch], check=True)
+
+    return f"https://github.com/{GITHUB_ORG}/{repo_path.name}"
+
+
 def repo_exists(repo_name):
     repo_url = f"{GITHUB_API_BASE_URL}/repos/{GITHUB_ORG}/{repo_name}"
     r = requests.get(repo_url, auth=(GITHUB_USERNAME, GITHUB_ACCESS_TOKEN))
