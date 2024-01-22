@@ -8,7 +8,6 @@ from typing import Dict
 from github_utils import (
     clone_repo,
     commit_and_push,
-    commit_to_orphan_branch,
     create_github_repo,
     get_branches,
     repo_exists,
