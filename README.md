@@ -1,13 +1,90 @@
----
-title: Tibetan Aligner
-emoji: 📖
-colorFrom: blue
-colorTo: purple
-sdk: gradio
-sdk_version: 3.34.0
-app_file: app.py
-pinned: true
-license: mit
----
+<h1 align="center">
+  <br>
+  <a href="https://buddhistai.tools/"><img src="https://raw.githubusercontent.com/WeBuddhist/visual-assets/refs/heads/main/logo/WB-logo-purple.png" alt="OpenPecha" width="150"></a>
+  <br>
+</h1>
 
-DISCLAIMER: This space has been created solely for testing and educational purposes. We do not claim any ownership or copyright over the align-tibetan script, which remains the sole property of its original creator, Sebastian Nehrlich. We have created this space to facilitate the use and testing of the align-tibetan script for interested users. If you use the align-tibetan script for any commercial or production purposes, we strongly encourage you to obtain permission from the original creator and comply with any relevant licensing requirements.
+<h1 align="center">tibetan-aligner-hf-space</h1>
+
+<p align="center">
+  |MIT| |Python| |NLP|
+</p>
+
+None
+
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Development](#development)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [How to get help](#how-to-get-help)
+- [Terms of use](#terms-of-use)
+
+## Features
+
+- NLP tooling for Tibetan/Indic text processing
+
+## Prerequisites
+
+- Python 3.8+
+- pip
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/OpenPecha/tibetan-aligner-hf-space.git
+cd tibetan-aligner-hf-space
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install the package
+pip install -e .
+```
+
+## Usage
+
+```python
+# Add usage example here
+```
+
+## Development
+
+```bash
+# Install dev dependencies
+pip install -e .[dev]
+
+# Run tests
+pytest
+
+# Lint
+flake8
+```
+
+## Testing
+
+```bash
+pytest tests/
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+Please read [CONTRIBUTING.md](https://github.com/OpenPecha/.github/blob/main/CONTRIBUTING.md) for details.
+
+## How to get help
+* File an issue.
+* Join our [discord](https://discord.com/invite/7GFpPFSTeA).
+
+## Terms of use
+MIT is licensed under the [MIT License](/LICENSE).
